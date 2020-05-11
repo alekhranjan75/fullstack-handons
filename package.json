@@ -13,5 +13,8 @@
     "mongoose": "^5.9.13",
     "passport": "^0.4.1",
     "passport-google-oauth20": "^2.0.0"
+  },
+  "engines": {
+    "node": "12.16.3"
   }
 }
