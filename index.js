@@ -1,14 +1,15 @@
 const express = require('express')
 const mongoose = require('mongoose')
+const passport = require('passport')
+const cookieSession = require('cookie-session')
 
+const mongoURI = require('./config/properties').mongoURI;
+const cookieKey = require('./config/properties').cookieKey
 const authRoutes = require('./routes/authRoutes')
-const User = require('./models/User')
 
 const app = express()
 
-
-const uri = require('./config/properties').mongoURI;
-mongoose.connect(uri, {
+mongoose.connect(mongoURI, {
         useNewUrlParser: true,
         useUnifiedTopology: true
     },
@@ -17,7 +18,18 @@ mongoose.connect(uri, {
         console.log('Successfully connected to database');
     }
 );
+//It extracts the cookie Data
+app.use(cookieSession({
+    keys: [cookieKey],
+    // Cookie Options
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+}))
 
+//middle-ware that  initializes passport
+app.use(passport.initialize());
+// another middleware that alters the request object and change the 'user' value that is currently the session id (from the client cookie) into the true deserialized user object
+// passport.session() calls deserializeUser on each request,
+app.use(passport.session());
 app.use('/', authRoutes)
 
 const PORT = process.env.PORT || 5000

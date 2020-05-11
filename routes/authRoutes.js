@@ -18,4 +18,13 @@ router.get('/auth/google/callback',
         res.redirect('/');
     });
 
+router.get('/api/logout', (req, res) => {
+    req.logout()
+    res.send(req.user)
+    console.log("Logged Out!!!")
+})
+router.get('/api/current_user', (req, res) => {
+    res.send(req.user)
+});
+
 module.exports = router
