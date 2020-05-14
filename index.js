@@ -1,11 +1,13 @@
 const express = require('express')
 const mongoose = require('mongoose')
 const passport = require('passport')
+const bodyParser = require('body-parser')
 const cookieSession = require('cookie-session')
 
 const mongoURI = require('./config/properties').mongoURI;
 const cookieKey = require('./config/properties').cookieKey
 const authRoutes = require('./routes/authRoutes')
+const billingRoutes = require('./routes/billingRoutes')
 
 const app = express()
 
@@ -18,6 +20,7 @@ mongoose.connect(mongoURI, {
         console.log('Successfully connected to database');
     }
 );
+app.use(bodyParser.json())
 //It extracts the cookie Data
 app.use(cookieSession({
     keys: [cookieKey],
@@ -31,7 +34,18 @@ app.use(passport.initialize());
 // passport.session() calls deserializeUser on each request,
 app.use(passport.session());
 app.use('/', authRoutes)
+app.use('/api/stripes', billingRoutes)
 
+if(process.env.NODE_ENV === 'production') {
+    //It will serve the files from main.js
+    app.use(express.static('client/build'))
+
+    //Serves the index.html file if doesn't recognoizes the route
+    const path = require('path')
+    app.get('*', (req, res) => {
+        res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'))
+    })
+}
 const PORT = process.env.PORT || 5000
 
 app.listen(PORT, () => {
